@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#16202a"/>
-  <circle cx="256" cy="220" r="112" fill="none" stroke="#ffffff" stroke-width="30"/>
-  <path d="M203 222l38 38 72-78" fill="none" stroke="#ffffff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="196" cy="398" r="20" fill="#5fd0a3"/>
-  <circle cx="256" cy="398" r="20" fill="#f0b24f"/>
-  <circle cx="316" cy="398" r="20" fill="#b49af0"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><style>path{fill:#16202a}@media (prefers-color-scheme:dark){path{fill:#e8eef3}}</style><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg>
