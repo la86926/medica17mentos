@@ -1,5 +1,5 @@
-const CACHE="tratamiento-v7";
-const FILES=["./","index.html","sync.js","icon.svg","apple-touch-icon.png","icon-192.png","icon-512.png","manifest.webmanifest"];
+const CACHE="tratamiento-v1.5";
+const FILES=["./","index.html","sync.js","logo.svg","favicon.ico","favicon-16.png","favicon-32.png","logo-180.png","logo-192.png","logo-512.png","logo-maskable-512.png","manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});
 // network first, so updates arrive; cache when offline
