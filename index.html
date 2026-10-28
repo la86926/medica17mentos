@@ -1,1 +1,296 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Mi tratamiento</title>
+<meta name="theme-color" content="#fbfcfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1418" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tratamiento">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
 
+/* Layout: a quiet column — strip of treatment days, then the selected day's three times, then end dates */
+:root{
+  --bg:#fbfcfd; --fg:#16202a; --muted:#8a97a4; --faint:#e7ecf0;
+  --sel:#16202a; --selfg:#ffffff;
+  --a:#2f8f6b; --d:#d08a1c; --k:#7656b8; --blue:#2f6fdb;
+  --font:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1418; --fg:#e8eef3; --muted:#7f8e9b; --faint:#232d36; --sel:#e8eef3; --selfg:#0f1418;
+  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1418; --fg:#e8eef3; --muted:#7f8e9b; --faint:#232d36; --sel:#e8eef3; --selfg:#0f1418;
+  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; color-scheme:dark}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.4;
+  padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:520px;margin:0 auto;padding-block:40px 64px;display:flex;flex-direction:column;gap:40px}
+header h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.025em}
+header p{margin:6px 0 0;color:var(--muted);font-size:14px;font-weight:500}
+
+.strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding:22px 4px 4px;scroll-snap-type:x proximity}
+.strip::-webkit-scrollbar{display:none}
+.day{flex:none;width:44px;display:flex;flex-direction:column;align-items:center;gap:6px;border:0;background:none;color:var(--fg);
+  font-family:var(--font);cursor:pointer;padding:0;position:relative;scroll-snap-align:center}
+.day .w{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.day .n{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.day .m{position:absolute;top:-20px;left:4px;font-size:11px;font-weight:700;color:var(--fg);letter-spacing:.04em}
+.day .s{width:6px;height:6px;border-radius:50%;background:transparent}
+.day.part .s{border:1.5px solid var(--muted)}
+.day.full .s{background:var(--fg)}
+.day.today .n{box-shadow:inset 0 0 0 1.5px var(--fg)}
+.day[aria-selected="true"] .n{background:var(--sel);color:var(--selfg);box-shadow:none}
+
+.dtitle{font-size:14px;color:var(--muted);font-weight:600;margin:0 0 -16px}
+.times{display:flex;flex-direction:column;gap:32px}
+.time{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+.time .t{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;padding-top:12px;color:var(--muted);position:relative}
+.time .t .sub{display:block;font-size:11px;font-weight:600;margin-top:2px}
+.time .t.ed{color:var(--fg);cursor:pointer}
+.time .t.ed .v{border-bottom:1.5px dashed var(--muted);padding-bottom:1px}
+.time .t.ed svg{width:12px;height:12px;margin-left:4px;vertical-align:-1px;stroke:var(--muted)}
+button.t{border:0;background:none;font-family:var(--font);text-align:left;margin:0}
+.sheet-bg{position:fixed;inset:0;background:rgba(10,15,20,.38);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;box-sizing:border-box;background:var(--bg);border-radius:22px 22px 0 0;display:flex;flex-direction:column;gap:14px;
+  padding:14px max(20px,env(safe-area-inset-right,0px)) calc(22px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sh-top{display:flex;justify-content:space-between;align-items:center}
+.sh-x{border:0;background:none;color:var(--muted);font:600 15px var(--font);padding:8px 0;cursor:pointer}
+.sh-ok{width:46px;height:46px;border-radius:50%;border:0;background:var(--blue);display:grid;place-items:center;cursor:pointer}
+.sh-ok svg{width:20px;height:20px}
+.wheels{position:relative;display:flex;justify-content:center;align-items:center;gap:6px;height:220px}
+.band{position:absolute;left:0;right:0;top:88px;height:44px;border-radius:12px;background:var(--faint)}
+.wheel{position:relative;height:220px;width:80px;box-sizing:border-box;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;padding-block:88px;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.wheel::-webkit-scrollbar{display:none}
+.wheel div{height:44px;display:grid;place-items:center;font:700 26px var(--font);font-variant-numeric:tabular-nums;scroll-snap-align:center;color:var(--muted)}
+.wheel div.cur{color:var(--fg)}
+.colon{position:relative;font:700 26px var(--font)}
+.sh-prev{margin:0;text-align:center;font-size:14px;color:var(--muted);min-height:20px;font-variant-numeric:tabular-nums}
+.sh-ok:focus-visible,.sh-x:focus-visible,button.t:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.warn{margin:6px 0 0;font-size:13px;color:var(--d);font-weight:600}
+.items{display:flex;flex-direction:column;min-width:0}
+.it{display:flex;align-items:center;gap:14px;width:100%;border:0;background:none;color:var(--fg);font:600 17px var(--font);
+  padding:10px 0;cursor:pointer;text-align:left}
+.it .b{width:26px;height:26px;border-radius:50%;border:2px solid var(--c);flex:none;display:grid;place-items:center;transition:background .15s}
+.it .b svg{width:14px;height:14px;opacity:0;transition:opacity .15s}
+.it.on .b{background:var(--c)}
+.it.on .b svg{opacity:1}
+.it.on .l{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px}
+.it:focus-visible,.day:focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:12px}
+
+.hint{margin:6px 0 0;font-size:13px;color:var(--muted);font-weight:500}
+.ends{display:flex;flex-direction:column;gap:12px;padding-top:28px;border-top:1px solid var(--faint)}
+.end{display:flex;align-items:center;gap:10px;font-size:14px}
+.end i{width:8px;height:8px;border-radius:50%;flex:none}
+.end span{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.hand{position:absolute;z-index:20;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:6px}
+.hand svg{width:38px;height:38px;animation:tap 1.2s ease-in-out infinite;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.hand span{background:var(--fg);color:var(--bg);font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap}
+@keyframes tap{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px) scale(.94)}}
+@media (prefers-reduced-motion:reduce){.hand svg{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Mi tratamiento</h1>
+    <p>28 oct – 26 nov</p>
+  </header>
+  <nav class="strip" id="strip" role="tablist" aria-label="Días del tratamiento"></nav>
+  <section>
+    <p class="dtitle" id="dtitle"></p>
+  </section>
+  <section class="times" id="times"></section>
+  <section class="ends" id="ends"></section>
+</div>
+<div class="sheet-bg" id="sheetBg" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Hora de la primera toma">
+    <div class="sh-top"><button class="sh-x" id="shCancel">Cancelar</button>
+      <button class="sh-ok" id="shOk" aria-label="Listo"><svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.3l2.6 2.6L11 4.4"/></svg></button></div>
+    <div class="wheels"><div class="band"></div><div class="wheel" id="wH"></div><span class="colon">:</span><div class="wheel" id="wM"></div></div>
+    <p class="sh-prev" id="shPrev"></p>
+  </div>
+</div>
+
+<script>
+const MEDS={a:{n:"Coxtor 120 mg",c:"--a",end:9},d:{n:"Deflazym 6 mg",c:"--d",end:4},k:{n:"Cledium 300 mg",c:"--k",end:29}};
+const START=new Date(2026,9,28),NDAYS=30;
+const DIAS=["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const DIASL=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const MESES=["ene","feb","mar","abr","may","jun","jul","ago","set","oct","nov","dic"];
+const MESESL=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","setiembre","octubre","noviembre","diciembre"];
+const iso=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const CHECK='<svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.3l2.6 2.6L11 4.4"/></svg>';
+const $=id=>document.getElementById(id);
+
+// Deflazym: 15 tablets, ideally every 8 h, never after 23:00.
+// If the day starts late, the three doses are spaced evenly up to 23:00 (at least 5 h apart);
+// whatever does not fit moves to the next day.
+const LATEST=1380,MINGAP=300,DEF_TOTAL=15;
+function defTimes(S){const w=LATEST-S;if(w<0)return[];
+  if(w>=2*MINGAP){const g=Math.min(480,Math.floor(w/10)*5);return[S,S+g,S+2*g]}
+  if(w>=MINGAP){const g=Math.min(480,Math.floor(w/5)*5);return[S,S+g]}
+  return[S]}
+function plan(){const p=[];let rem=DEF_TOTAL;
+  for(let i=0;i<NDAYS;i++){const S=startFor(i),d=rem>0?defTimes(S).slice(0,rem):[];rem-=d.length;p.push({S,def:d})}
+  return p}
+const SLOTKEYS=["0700","1500","2300"];
+function dosesFor(i,P){
+  if(i<0||i>=NDAYS)return[];
+  const p=P[i],m=[];if(i<=MEDS.a.end)m.push("a");if(p.def.length)m.push("d");m.push("k");
+  const out=[{h:SLOTKEYS[0],time:p.S,meds:m}];
+  for(let j=1;j<p.def.length;j++)out.push({h:SLOTKEYS[j],time:p.def[j],meds:["d"]});
+  return out;
+}
+
+// state: plain, mutable copies only
+let state={c:{},tf:{},t:{}};
+const load=s=>({c:Object.assign({},s&&s.c),tf:Object.assign({},s&&s.tf),t:Object.assign({},s&&s.t)});
+// start time of a day: only its own change counts; every other day starts at 9:00
+const toMin=s=>{const [h,m]=s.split(":").map(Number);return h*60+m};
+const toHH=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
+function startFor(i){const v=state.t[iso(addD(START,i))];return v?Math.min(LATEST,toMin(v)):540}
+const fmtMin=m=>Math.floor(m/60)+":"+String(m%60).padStart(2,"0");
+const PEN='<svg viewBox="0 0 12 12" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.2 1.8l2 2L4 10H2V8z"/></svg>';
+try{const s=JSON.parse(localStorage.getItem("trat-v1")||"null");if(s)state=load(s)}catch(e){}
+const saveLocal=()=>{try{localStorage.setItem("trat-v1",JSON.stringify(state))}catch(e){}};
+
+const today=new Date();today.setHours(0,0,0,0);
+const todayI=Math.round((today-START)/864e5);
+let sel=Math.max(0,Math.min(NDAYS-1,todayI));
+
+function dayStatus(i,P){const k=iso(addD(START,i));let t=0,d=0;
+  for(const x of dosesFor(i,P))for(const m of x.meds){t++;if(state.c[k+"|"+x.h+"|"+m])d++}
+  return d===0?"":d===t?"full":"part"}
+
+function renderStrip(P){
+  let h="";
+  for(let i=0;i<NDAYS;i++){const d=addD(START,i);
+    const mon=(i===0||d.getDate()===1)?`<span class="m">${MESES[d.getMonth()]}</span>`:"";
+    h+=`<button class="day ${dayStatus(i,P)}${i===todayI?" today":""}" role="tab" id="day${i}" data-i="${i}" aria-selected="${i===sel}" aria-label="${DIASL[d.getDay()]} ${d.getDate()} de ${MESESL[d.getMonth()]}">${mon}<span class="w">${DIAS[d.getDay()]}</span><span class="n">${d.getDate()}</span><span class="s"></span></button>`}
+  $("strip").innerHTML=h;
+}
+function warnFor(i,P){
+  if(i<=0)return"";const p=P[i],q=P[i-1];
+  if(p.def.length&&q.def.length){const g=p.S+1440-q.def[q.def.length-1];if(g<360)return`Solo ${Math.round(g/60)} h desde la última Deflazym`}
+  const g=p.S+1440-q.S;if(g<1200)return`Solo ${Math.round(g/60)} h desde la toma de ayer`;
+  return"";
+}
+function renderDay(P){
+  const d=addD(START,sel),key=iso(d),warn=warnFor(sel,P);
+  $("dtitle").textContent=(sel===todayI?"Hoy · ":"")+DIASL[d.getDay()]+" "+d.getDate()+" de "+MESESL[d.getMonth()];
+  $("times").innerHTML=dosesFor(sel,P).map((x,j)=>{const first=j===0;
+    const lab=first?`<button class="t ed" id="startBtn" aria-label="Cambiar hora de la primera toma"><span class="v">${fmtMin(x.time)}</span>${PEN}</button>`
+      :`<div class="t">${fmtMin(x.time)}</div>`;
+    return `<div class="time">${lab}<div class="items">`+
+    x.meds.map(m=>{const k=key+"|"+x.h+"|"+m,on=!!state.c[k];
+      return `<button class="it${on?" on":""}" data-k="${k}" aria-pressed="${on}" style="--c:var(${MEDS[m].c})"><span class="b">${CHECK}</span><span class="l">${MEDS[m].n}</span></button>`}).join("")+
+    `${first?(x.meds.length>1?'<p class="hint">Juntas, con comida</p>':'<p class="hint">Con comida</p>'):''}${first&&warn?`<p class="warn">${warn}</p>`:''}</div></div>`}).join("");
+  placeHand();
+}
+function renderEnds(P){
+  let lastD=0;P.forEach((p,i)=>{if(p.def.length)lastD=i});
+  const ends={d:lastD,a:MEDS.a.end,k:MEDS.k.end};
+  $("ends").innerHTML=["d","a","k"].map(m=>{const e=addD(START,ends[m]);
+    return `<div class="end"><i style="background:var(${MEDS[m].c})"></i>${MEDS[m].n}<span>hasta ${DIAS[e.getDay()].toLowerCase()} ${e.getDate()} ${MESES[e.getMonth()]}</span></div>`}).join("");
+}
+function render(){const P=plan();renderStrip(P);renderDay(P);renderEnds(P)}
+
+// time picker: closes only with Listo or Cancelar
+const HOURS=[];for(let h=5;h<=23;h++)HOURS.push(h);
+const MINS=[];for(let m=0;m<60;m+=5)MINS.push(m);
+const IH=44;
+function fillWheel(el,arr){el.innerHTML=arr.map(v=>`<div>${String(v).padStart(2,"0")}</div>`).join("")}
+fillWheel($("wH"),HOURS);fillWheel($("wM"),MINS);
+const idxOf=el=>Math.max(0,Math.min(el.children.length-1,Math.round(el.scrollTop/IH)));
+function pickVal(){let h=HOURS[idxOf($("wH"))],m=MINS[idxOf($("wM"))];if(h===23)m=0;return h*60+m}
+let rafP=0;
+function onWheel(){cancelAnimationFrame(rafP);rafP=requestAnimationFrame(()=>{
+  for(const el of [$("wH"),$("wM")]){const i=idxOf(el);[...el.children].forEach((c,j)=>c.classList.toggle("cur",j===i))}
+  const key=iso(addD(START,sel)),old=state.t[key];state.t[key]=toHH(pickVal());
+  const P=plan(),p=P[sel];if(old===undefined)delete state.t[key];else state.t[key]=old;
+  $("shPrev").textContent=p.def.length?"Deflazym: "+p.def.map(fmtMin).join(" · "):"";
+})}
+$("wH").addEventListener("scroll",onWheel,{passive:true});$("wM").addEventListener("scroll",onWheel,{passive:true});
+function openPicker(){
+  const S=startFor(sel);$("sheetBg").hidden=false;document.body.style.overflow="hidden";
+  requestAnimationFrame(()=>{
+    $("wH").scrollTop=Math.max(0,HOURS.indexOf(Math.floor(S/60)))*IH;
+    $("wM").scrollTop=Math.max(0,MINS.indexOf(Math.round((S%60)/5)*5))*IH;onWheel()});
+}
+function closePicker(){$("sheetBg").hidden=true;document.body.style.overflow=""}
+$("shCancel").addEventListener("click",closePicker);
+$("shOk").addEventListener("click",()=>{state.t[iso(addD(START,sel))]=toHH(pickVal());closePicker();persist();render()});
+
+
+// sync across your devices (falls back to this device)
+let ref=null,writing=false,pending=false,lastLocal=0;
+function persist(){saveLocal();lastLocal=Date.now();if(!ref)return;if(writing){pending=true;return}
+  writing=true;ref.set({c:Object.assign({},state.c),tf:Object.assign({},state.tf),t:Object.assign({},state.t)}).catch(()=>{}).finally(()=>{writing=false;if(pending){pending=false;persist()}})}
+(async()=>{try{
+  if(!window.claude||!window.claude.use)return;
+  const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+  if(!db||!user)return;const id=await user.id();if(!id)return;
+  ref=db.doc("data/users/"+id+"/tratamiento");
+  ref.onSnapshot(s=>{
+    if(writing||pending||s.metadata.hasPendingWrites||Date.now()-lastLocal<2500)return;
+    const d=s.data();
+    if(d){state=load(d);saveLocal();render()}
+    else if(Object.keys(state.c).length||Object.keys(state.t).length)persist();
+  },()=>{});
+}catch(e){}})();
+
+document.addEventListener("click",e=>{
+  const dy=e.target.closest(".day");if(dy){sel=+dy.dataset.i;render();return}
+  if(e.target.closest("#startBtn")){openPicker();return}
+  const it=e.target.closest(".it");if(it){const k=it.dataset.k;
+    if(state.c[k])delete state.c[k];else state.c[k]=true;
+    hideHand();persist();render()}
+});
+
+// first-visit hint
+let tutoSeen=false;try{tutoSeen=localStorage.getItem("trat-tuto2")==="1"}catch(e){}
+let handEl=null;
+function placeHand(){
+  if(handEl){handEl.remove();handEl=null}
+  if(tutoSeen)return;
+  const t=document.querySelector(".it:not(.on) .b");if(!t)return;
+  const r=t.getBoundingClientRect();
+  handEl=document.createElement("div");handEl.className="hand";
+  handEl.innerHTML='<svg viewBox="0 0 48 48"><path d="M19 6c2 0 3.5 1.6 3.5 3.6v12.2l1.4-.4c1.7-.4 3.4.4 4 2l.2.4 1.6-.4c1.7-.4 3.4.5 4 2.1l1.8-.3c1.8-.3 3.5.9 3.8 2.7.2 1 .2 2 .1 3l-.7 6.3c-.4 3.6-3.4 6.3-7 6.3h-7.3c-2.3 0-4.4-1.1-5.8-3l-7.5-10.4c-1-1.4-.8-3.4.6-4.4 1.3-1 3.1-.9 4.3.2l1.4 1.3V9.6C15.5 7.6 17 6 19 6z" fill="#fff" stroke="#16202a" stroke-width="2" stroke-linejoin="round"/></svg><span>Toca para marcar o desmarcar</span>';
+  document.body.appendChild(handEl);
+  handEl.style.left=(r.left+window.scrollX-6)+"px";
+  handEl.style.top=(r.bottom+window.scrollY+2)+"px";
+}
+function hideHand(){if(tutoSeen)return;tutoSeen=true;try{localStorage.setItem("trat-tuto2","1")}catch(e){}if(handEl){handEl.remove();handEl=null}}
+window.addEventListener("resize",()=>{if(!tutoSeen)placeHand()});
+
+// app feel: no pinch zoom, confirm before reload
+document.addEventListener("gesturestart",e=>e.preventDefault());
+document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+window.addEventListener("beforeunload",e=>{e.preventDefault();e.returnValue="Si actualizas, tal vez pierdas lo que marcaste."});
+
+render();
+requestAnimationFrame(()=>{const b=$("day"+sel);if(b)b.scrollIntoView({inline:"center",block:"nearest"})});
+
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
+</script>
+</body>
+</html>
