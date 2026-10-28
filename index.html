@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Mi tratamiento</title>
+<meta name="description" content="Organiza tus medicamentos: horario de tomas, recordatorios en tu calendario y sincronización con tu ID.">
 <meta name="theme-color" content="#fbfcfd" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1418" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -125,10 +126,53 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
 .logo{width:30px;height:30px;flex:none;color:var(--fg)}
 .logo svg{width:100%;height:100%;display:block}
 .logo path{fill:currentColor}
-.seg{display:flex;gap:4px;padding:4px;background:var(--faint);border-radius:12px;margin-top:20px}
-.seg button{flex:1;border:0;background:none;color:var(--muted);font:700 14px var(--font);padding:9px 0;border-radius:9px;cursor:pointer}
-.seg button[aria-selected="true"]{background:var(--card);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.seg button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.top{display:flex;align-items:center;gap:10px;margin-left:-8px}
+.mbtn{width:42px;height:42px;border:0;background:none;border-radius:50%;display:grid;place-items:center;cursor:pointer;color:var(--fg);flex:none}
+.mbtn svg{width:22px;height:22px;stroke:currentColor}
+.mbtn:focus-visible{outline:2px solid var(--fg)}
+.scrim{position:fixed;inset:0;background:rgba(10,15,20,.32);z-index:44}
+.menu{position:fixed;top:0;bottom:0;left:0;width:min(280px,82vw);box-sizing:border-box;background:var(--bg);z-index:45;display:flex;flex-direction:column;gap:22px;
+  transform:translateX(-105%);transition:transform .25s ease;border-right:1px solid var(--faint);
+  padding:calc(26px + env(safe-area-inset-top,0px)) 14px calc(20px + env(safe-area-inset-bottom,0px)) max(14px,env(safe-area-inset-left,0px))}
+.menu.open{transform:none;box-shadow:8px 0 30px rgba(0,0,0,.12)}
+.mhead{display:flex;align-items:center;gap:10px;padding:0 10px}
+.mhead b{font-size:17px;font-weight:800;letter-spacing:-.015em}
+.mhead .logo{width:26px;height:26px}
+.mnav{display:flex;flex-direction:column;gap:2px}
+.mnav button{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:var(--fg);font:600 16px var(--font);padding:12px 10px;border-radius:12px;cursor:pointer;text-align:left}
+.mnav button svg{width:20px;height:20px;stroke:currentColor;flex:none;color:var(--muted)}
+.mnav button[aria-current="page"]{background:var(--faint)}
+.mnav button[aria-current="page"] svg{color:var(--fg)}
+.mnav button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.mnav button svg.pillic{stroke:none}
+.mnav button svg.pillic path{fill:currentColor}
+.mnav .dot{width:7px;height:7px;border-radius:50%;background:var(--m0);margin-left:auto}
+.mver{margin:auto 10px 0;font-size:12px;color:var(--muted);opacity:.75}
+@media (min-width:960px){
+  .menu{transform:none;transition:none}
+  .menu.open{box-shadow:none}
+  .mbtn,.scrim{display:none!important}
+  .top{margin-left:0}
+  body{padding-left:calc(280px + 32px)}
+}
+@media (prefers-reduced-motion:reduce){.menu{transition:none}}
+.idbox{display:flex;flex-direction:column;gap:14px}
+.lead{margin:0;font-size:16px;color:var(--muted);line-height:1.5;max-width:42ch}
+.idform{display:flex;gap:8px}
+.idform input{flex:1;min-width:0;font:600 17px var(--font);color:var(--fg);background:var(--card);border:1.5px solid var(--faint);border-radius:12px;padding:11px 12px;letter-spacing:.04em;user-select:text;-webkit-user-select:text}
+.idform input:focus{outline:none;border-color:var(--blue)}
+.idform .btn{padding:0 18px}
+.lnk{border:0;background:none;color:var(--blue);font:600 15px var(--font);padding:6px 0;cursor:pointer;align-self:flex-start}
+.lnk:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.lnk.out{color:var(--red);margin-top:12px}
+.lbl2{margin:0;font-size:13px;font-weight:700;color:var(--muted)}
+.idrow{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.code{font:800 28px var(--font);letter-spacing:.06em;user-select:text;-webkit-user-select:text;word-break:break-all;min-width:0}
+.st{margin:0;font-size:14px;color:var(--muted)}
+.st.ok{color:var(--m0)}
+.st.bad{color:var(--d)}
+.note{margin:0;font-size:13px;color:var(--muted)}
+.btn:disabled{opacity:.5;cursor:default}
 .it .l small{display:block;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;margin-top:1px}
 .empty{display:flex;flex-direction:column;align-items:flex-start;gap:14px;padding-block:8px}
 .empty p{margin:0;color:var(--muted);font-size:15px}
@@ -164,18 +208,14 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
 .del{border:0;background:none;color:var(--red);font:700 15px var(--font);padding:6px 0;cursor:pointer;align-self:flex-start}
 .ferr{margin:0;color:var(--d);font-size:13px;font-weight:600}
 .sheet.tall{max-height:92vh;overflow-y:auto}
-.ver{margin:0;text-align:center;font-size:12px;color:var(--muted);opacity:.7;font-variant-numeric:tabular-nums}
 .chips button:focus-visible,.step button:focus-visible,.colors button:focus-visible,.del:focus-visible,.add:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="hrow"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><h1>Mi tratamiento</h1></div>
-    <nav class="seg" role="tablist" aria-label="Secciones">
-      <button role="tab" id="tabH" aria-selected="true" data-view="horario">Horario</button>
-      <button role="tab" id="tabM" aria-selected="false" data-view="medicamentos">Medicamentos</button>
-    </nav>
+  <header class="top">
+    <button class="mbtn" id="menuBtn" aria-label="Abrir menú" aria-controls="menu" aria-expanded="false"><svg viewBox="0 0 22 22" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h14M4 11h14M4 15h14"/></svg></button>
+    <h1 id="vTitle">Horario</h1>
   </header>
 
   <div id="vH" class="vh">
@@ -192,8 +232,33 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
     <button class="add" id="addMed"><span class="pl"><svg viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 1.5v7M1.5 5h7"/></svg></span>Agregar medicamento</button>
   </div>
 
-  <p class="ver">v1.3</p>
+  <div id="vI" hidden>
+    <div class="idbox" id="idOff">
+      <p class="lead">Con tu ID ves tus medicamentos, horarios y tomas en todos tus dispositivos.</p>
+      <form class="idform" id="idForm" autocomplete="off"><input id="idIn" type="text" inputmode="text" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="28" placeholder="Tu ID" aria-label="Tu ID"><button class="btn" type="submit" id="idGo">Entrar</button></form>
+      <p class="ferr" id="idErr" role="alert"></p>
+      <button class="lnk" id="idNew" type="button">Crear un ID nuevo</button>
+    </div>
+    <div class="idbox" id="idOn" hidden>
+      <p class="lbl2">Tu ID</p>
+      <div class="idrow"><div class="code" id="idCode"></div><button class="lnk" id="idCopy" type="button">Copiar</button></div>
+      <p class="st" id="idState"></p>
+      <p class="note">Quien tenga tu ID puede ver tus tomas. No lo compartas.</p>
+      <button class="lnk out" id="idOut" type="button">Cerrar sesión en este dispositivo</button>
+    </div>
+  </div>
 </div>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="menu" id="menu" aria-label="Menú">
+  <div class="mhead"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><b>Mi tratamiento</b></div>
+  <nav class="mnav">
+    <button data-view="medicamentos"><svg class="pillic" viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg>Medicamentos</button>
+    <button data-view="horario"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2.5"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg>Horario</button>
+    <button data-view="mi-id"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3.3"/><path d="M3.8 17c.8-3.2 3.3-5 6.2-5s5.4 1.8 6.2 5"/></svg>Mi ID<i class="dot" id="idDot" hidden></i></button>
+  </nav>
+  <p class="mver">Mi tratamiento · v1.4</p>
+</aside>
 
 <div class="sheet-bg" id="medBg" hidden>
   <div class="sheet tall" role="dialog" aria-modal="true" aria-labelledby="fmTitle">
@@ -249,14 +314,15 @@ const nextDayLbl=m=>m>=1440?((m-1440)<360?"madrugada":"día siguiente"):"";
 const fmtDate=d=>DIAS[d.getDay()].toLowerCase()+" "+d.getDate()+" "+MESES[d.getMonth()];
 
 // ---------- state ----------
-const DEFAULT_MEDS=[
+// only used to keep the data of people who used the first version
+const LEGACY_MEDS=[
   {id:"a",n:"Coxtor 120 mg",every:24,days:10,start:"2026-10-28",note:"",col:0},
   {id:"d",n:"Deflazym 6 mg",every:8,days:5,start:"2026-10-28",note:"",col:1},
   {id:"k",n:"Cledium 300 mg",every:24,days:30,start:"2026-10-28",note:"Con comida",col:2}
 ];
 let state={meds:[],c:{},t:{},tf:{},v:2};
 function load(s){
-  const o={meds:Array.isArray(s&&s.meds)?s.meds.map(m=>Object.assign({},m)):DEFAULT_MEDS.map(m=>Object.assign({},m)),
+  const o={meds:Array.isArray(s&&s.meds)?s.meds.map(m=>Object.assign({},m)):(s&&(s.c&&Object.keys(s.c).length||s.t&&Object.keys(s.t).length)?LEGACY_MEDS.map(m=>Object.assign({},m)):[]),
     c:Object.assign({},s&&s.c),t:Object.assign({},s&&s.t),tf:Object.assign({},s&&s.tf),v:2};
   if(!(s&&s.v===2)){ // move older records to the new format
     const SL={"0700":0,"1500":1,"2300":2},c={};
@@ -313,7 +379,9 @@ function warnFor(d){
 // ---------- views ----------
 const today=new Date();today.setHours(0,0,0,0);
 let sel=today;
-let view=location.hash==="#medicamentos"?"medicamentos":"horario";
+const VIEWS={horario:"Horario",medicamentos:"Medicamentos","mi-id":"Mi ID"};
+const viewFromHash=()=>{const h=location.hash.slice(1);return VIEWS[h]?h:"horario"};
+let view=viewFromHash();
 function clampSel(){const r=range();if(!r)return;const last=addD(r.a,r.n-1);if(sel<r.a)sel=r.a;if(sel>last)sel=last}
 clampSel();
 
@@ -353,14 +421,23 @@ function renderMeds(){
 }
 function render(){
   clampSel();
-  $("vH").hidden=view!=="horario";$("vM").hidden=view!=="medicamentos";
-  $("tabH").setAttribute("aria-selected",view==="horario");$("tabM").setAttribute("aria-selected",view==="medicamentos");
-  if(view==="horario"){renderStrip();renderDay();renderEnds()}else{renderMeds();if(handEl){handEl.remove();handEl=null}}
+  $("vH").hidden=view!=="horario";$("vM").hidden=view!=="medicamentos";$("vI").hidden=view!=="mi-id";
+  $("vTitle").textContent=VIEWS[view];
+  document.querySelectorAll(".mnav [data-view]").forEach(b=>{if(b.dataset.view===view)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  if(view==="horario"){renderStrip();renderDay();renderEnds()}
+  else{if(view==="medicamentos")renderMeds();if(handEl){handEl.remove();handEl=null}}
+  if(window.TRAT&&window.TRAT.onView)window.TRAT.onView(view);
 }
-function go(v){view=v;try{history.replaceState(null,"",v==="medicamentos"?"#medicamentos":location.pathname)}catch(e){}render();
+function go(v){view=v;closeMenu();try{history.replaceState(null,"",v==="horario"?location.pathname:"#"+v)}catch(e){}render();window.scrollTo(0,0);
   if(v==="horario")requestAnimationFrame(scrollSel)}
 function scrollSel(){const b=$("day-"+iso(sel));if(b&&b.scrollIntoView)b.scrollIntoView({inline:"center",block:"nearest"})}
-window.addEventListener("hashchange",()=>{view=location.hash==="#medicamentos"?"medicamentos":"horario";render()});
+window.addEventListener("hashchange",()=>{view=viewFromHash();render()});
+// side menu
+function openMenu(){$("menu").classList.add("open");$("scrim").hidden=false;$("menuBtn").setAttribute("aria-expanded","true")}
+function closeMenu(){$("menu").classList.remove("open");$("scrim").hidden=true;$("menuBtn").setAttribute("aria-expanded","false")}
+$("menuBtn").addEventListener("click",openMenu);
+$("scrim").addEventListener("click",closeMenu);
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeMenu()});
 
 // ---------- time picker (12 h, AM/PM): closes only with Listo or Cancelar ----------
 const HOURS=[];for(let h=1;h<=12;h++)HOURS.push(h);
@@ -448,8 +525,8 @@ $("fmDel").addEventListener("click",()=>{
 
 // ---------- taps ----------
 document.addEventListener("click",e=>{
-  const tb=e.target.closest(".seg [data-view]");if(tb){go(tb.dataset.view);return}
-  const g=e.target.closest("[data-go]");if(g){go(g.dataset.go);if(g.dataset.go==="medicamentos")openMed(-1);return}
+  const tb=e.target.closest(".mnav [data-view]");if(tb){go(tb.dataset.view);return}
+  const g=e.target.closest("[data-go]");if(g){newSeen=true;try{localStorage.setItem("trat-tuto-new","1")}catch(_){}go(g.dataset.go);if(g.dataset.go==="medicamentos")openMed(-1);return}
   const dy=e.target.closest(".day");if(dy){sel=parseISO(dy.dataset.d);render();return}
   const ed=e.target.closest("[data-edit]");if(ed){openPicker(+ed.dataset.edit);return}
   if(e.target.closest("#calDay")){addToCalendar(null);return}
@@ -490,11 +567,16 @@ let tutoSeen=false;try{tutoSeen=localStorage.getItem("trat-tuto2")==="1"}catch(e
 let handEl=null;
 function placeHand(){
   if(handEl){handEl.remove();handEl=null}
+  if(view==="horario"&&!state.meds.length&&!newSeen){const t=document.querySelector("#times [data-go]");if(t)showHand(t,"Toca para agregar tu primer medicamento");return}
   if(tutoSeen||view!=="horario")return;
   const t=document.querySelector(".it:not(.on) .b");if(!t)return;
+  showHand(t,"Toca para marcar o desmarcar");
+}
+let newSeen=false;try{newSeen=localStorage.getItem("trat-tuto-new")==="1"}catch(e){}
+function showHand(t,txt){
   const r=t.getBoundingClientRect();
   handEl=document.createElement("div");handEl.className="hand";
-  handEl.innerHTML='<svg viewBox="0 0 48 48"><path d="M19 6c2 0 3.5 1.6 3.5 3.6v12.2l1.4-.4c1.7-.4 3.4.4 4 2l.2.4 1.6-.4c1.7-.4 3.4.5 4 2.1l1.8-.3c1.8-.3 3.5.9 3.8 2.7.2 1 .2 2 .1 3l-.7 6.3c-.4 3.6-3.4 6.3-7 6.3h-7.3c-2.3 0-4.4-1.1-5.8-3l-7.5-10.4c-1-1.4-.8-3.4.6-4.4 1.3-1 3.1-.9 4.3.2l1.4 1.3V9.6C15.5 7.6 17 6 19 6z" fill="#fff" stroke="#16202a" stroke-width="2" stroke-linejoin="round"/></svg><span>Toca para marcar o desmarcar</span>';
+  handEl.innerHTML='<svg viewBox="0 0 48 48"><path d="M19 6c2 0 3.5 1.6 3.5 3.6v12.2l1.4-.4c1.7-.4 3.4.4 4 2l.2.4 1.6-.4c1.7-.4 3.4.5 4 2.1l1.8-.3c1.8-.3 3.5.9 3.8 2.7.2 1 .2 2 .1 3l-.7 6.3c-.4 3.6-3.4 6.3-7 6.3h-7.3c-2.3 0-4.4-1.1-5.8-3l-7.5-10.4c-1-1.4-.8-3.4.6-4.4 1.3-1 3.1-.9 4.3.2l1.4 1.3V9.6C15.5 7.6 17 6 19 6z" fill="#fff" stroke="#16202a" stroke-width="2" stroke-linejoin="round"/></svg><span>'+txt+'</span>';
   document.body.appendChild(handEl);
   handEl.style.left=(r.left+window.scrollX-6)+"px";
   handEl.style.top=(r.bottom+window.scrollY+2)+"px";
@@ -509,6 +591,9 @@ window.addEventListener("beforeunload",e=>{e.preventDefault();e.returnValue="Si 
 
 render();
 requestAnimationFrame(scrollSel);
+</script>
+<script type="module" src="sync.js"></script>
+<script>
 if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})})}
 </script>
 </body>
