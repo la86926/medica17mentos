@@ -11,11 +11,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tratamiento">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="icon" href="favicon.ico?v=2.0" sizes="any">
-<link rel="icon" href="favicon-32.png?v=2.0" type="image/png" sizes="32x32">
-<link rel="icon" href="favicon-16.png?v=2.0" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="logo-180.png?v=2.0" sizes="180x180">
-<link rel="manifest" href="manifest.webmanifest?v=2.0">
+<link rel="icon" href="favicon.ico?v=2.1" sizes="any">
+<link rel="icon" href="favicon-32.png?v=2.1" type="image/png" sizes="32x32">
+<link rel="icon" href="favicon-16.png?v=2.1" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="logo-180.png?v=2.1" sizes="180x180">
+<link rel="manifest" href="manifest.webmanifest?v=2.1">
 <meta property="og:title" content="Mi tratamiento">
 <meta property="og:description" content="Organiza tus medicamentos y tus tomas, y sincronízalos con tu ID.">
 <meta property="og:image" content="https://la86926.github.io/medica17mentos/logo-512.png">
@@ -285,26 +285,9 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
   </div>
 </div>
 
-<div class="sheet-bg" id="choiceBg" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="chTitle">
-    <div class="idbox" id="chAsk">
-      <h2 class="chh" id="chTitle">¿Qué quieres usar?</h2>
-      <p class="note">Este dispositivo y tu ID tienen datos distintos.</p>
-      <button class="opt" id="chCloud" type="button"><b>Lo de tu ID</b><span>Reemplaza lo de este dispositivo</span></button>
-      <button class="opt" id="chLocal" type="button"><b>Lo de este dispositivo</b><span>Reemplaza lo de tu ID</span></button>
-      <button class="lnk" id="chCancel" type="button">Cancelar</button>
-    </div>
-    <div class="idbox" id="chConfirm" hidden>
-      <h2 class="chh">¿Reemplazar lo de tu ID?</h2>
-      <p class="note">Lo que tiene tu ID se cambiará por lo de este dispositivo, en todos tus dispositivos.</p>
-      <div class="idbtns"><button class="btn" id="chYes" type="button">Reemplazar</button><button class="lnk" id="chBack" type="button">Volver</button></div>
-    </div>
-  </div>
-</div>
-
 <div class="scrim" id="scrim" hidden></div>
 <aside class="menu" id="menu" aria-label="Menú">
-  <div class="mhead"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><b>Mi tratamiento</b><span class="mv">v2.0</span></div>
+  <div class="mhead"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><b>Mi tratamiento</b><span class="mv">v2.1</span></div>
   <nav class="mnav">
     <button data-view="medicamentos"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.6" y="1.8" width="6.8" height="2.6" rx=".9"/><path d="M5.6 4.4v1.3L3.9 8.1a2 2 0 0 0-.4 1.2v6.9c0 .9.7 1.6 1.6 1.6h3.4"/><path d="M10.4 4.4v1.3l1.7 2.4c.3.4.4.8.4 1.2v1.4"/><path d="M8 10.3v3.2M6.4 11.9h3.2"/><rect x="9.4" y="13.2" width="9.2" height="4.4" rx="2.2" transform="rotate(-30 14 15.4)"/><path d="M13.1 13.6l1.9 3.4"/></svg>Medicamentos</button>
     <button data-view="horario"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2.5"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg>Horario</button>
@@ -395,7 +378,7 @@ const EXAMPLE_MEDS=()=>{const t=iso(new Date());return[
 try{if(!state.meds.length&&localStorage.getItem("trat-seeded")!=="2"){state.meds=EXAMPLE_MEDS()}localStorage.setItem("trat-seeded","2")}catch(e){}
 saveLocal();
 function persist(){saveLocal();if(window.TRAT&&window.TRAT.onChange)window.TRAT.onChange()}
-window.TRAT={get:()=>state,set:s=>{state=load(Object.assign({v:2},s));saveLocal();render()},onChange:null};
+window.TRAT={onId:on=>{if(on&&handEl){handEl.remove();handEl=null}},get:()=>state,set:s=>{state=load(Object.assign({v:2},s));saveLocal();render()},onChange:null};
 
 // ---------- schedule ----------
 const medStart=m=>parseISO(m.start);
@@ -625,8 +608,10 @@ let toastT=0;function toast(t){let el=document.querySelector(".toast");if(!el){e
 // ---------- first-visit hint ----------
 let tutoSeen=false;try{tutoSeen=localStorage.getItem("trat-tuto2")==="1"}catch(e){}
 let handEl=null;
+function hasId(){try{return !!localStorage.getItem("trat-code")}catch(e){return false}}
 function placeHand(){
   if(handEl){handEl.remove();handEl=null}
+  if(hasId())return;
   if(view==="horario"&&!state.meds.length&&!newSeen){const t=document.querySelector("#times [data-go]");if(t)showHand(t,"Toca para agregar tu primer medicamento");return}
   if(tutoSeen||view!=="horario")return;
   const t=document.querySelector(".it:not(.on) .b");if(!t)return;

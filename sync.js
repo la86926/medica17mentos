@@ -25,7 +25,7 @@ const $ = id => document.getElementById(id);
 const T = window.TRAT;
 
 let code = st.get('trat-code') || '';
-let fb = null, ref = null, unsub = null, timer = 0, status = code ? 'connecting' : 'off', pending = null;
+let fb = null, ref = null, unsub = null, timer = 0, status = code ? 'connecting' : 'off';
 
 const MSG = {
   connecting: 'Conectando…',
@@ -66,7 +66,6 @@ const pack = s => ({
 });
 const fromCloud = r => ({ meds: r.meds || [], c: r.c || {}, t: r.t || {}, tf: (T.get().tf) || {} });
 const hasData = d => !!(d.meds && d.meds.some(m => !m.ex));
-const same = (a, b) => JSON.stringify([a.meds || [], a.c || {}, a.t || {}]) === JSON.stringify([b.meds || [], b.c || {}, b.t || {}]);
 
 // read an ID, following the note an old ID leaves after «Cambiar ID»
 async function readId(id) {
@@ -80,7 +79,7 @@ async function readId(id) {
   return { id, data: null };
 }
 function use(id) {
-  code = id; st.set('trat-code', code);
+  code = id; st.set('trat-code', code); if (T.onId) T.onId(true);
   ref = docFor(code);
   if (unsub) { unsub(); unsub = null }
   unsub = fb.fs.onSnapshot(ref, s => {
@@ -103,7 +102,7 @@ async function entrar(raw) {
     const r = await readId(id);
     if (!r.data) return err('idErr', `No existe el ID «${id}». Revisa que esté bien escrito, o tócalo en Crear.`);
     const local = T.get();
-    if (hasData(local) && hasData(r.data) && !same(local, r.data)) { pending = r; openChoice(); return }
+    // an existing ID always brings its latest saved copy, without asking
     if (hasData(r.data)) T.set(fromCloud(r.data));
     else await fb.fs.setDoc(docFor(r.id), pack(local)); // the ID has no medicines of its own yet: keep this device's
     use(r.id); $('idIn').value = '';
@@ -155,21 +154,8 @@ function push() {
 // Salir: this device stops syncing; what it has stays here
 function salir() {
   if (unsub) { unsub(); unsub = null }
-  ref = null; code = ''; st.del('trat-code'); setStatus('off');
+  ref = null; code = ''; st.del('trat-code'); if (T.onId) T.onId(false); setStatus('off');
 }
-
-// «¿Qué quieres usar?»
-function openChoice() { $('chAsk').hidden = false; $('chConfirm').hidden = true; $('choiceBg').hidden = false; document.body.style.overflow = 'hidden' }
-function closeChoice() { $('choiceBg').hidden = true; document.body.style.overflow = ''; pending = null; busy(false) }
-$('chCancel').addEventListener('click', closeChoice);
-$('chCloud').addEventListener('click', () => { const r = pending; closeChoice(); T.set(fromCloud(r.data)); use(r.id); $('idIn').value = '' });
-$('chLocal').addEventListener('click', () => { $('chAsk').hidden = true; $('chConfirm').hidden = false });
-$('chBack').addEventListener('click', () => { $('chAsk').hidden = false; $('chConfirm').hidden = true });
-$('chYes').addEventListener('click', async () => {
-  const r = pending; closeChoice();
-  try { await fb.fs.setDoc(docFor(r.id), pack(T.get())); use(r.id); $('idIn').value = '' }
-  catch (e) { err('idErr', 'No se pudo guardar en tu ID. Revisa tu conexión.') }
-});
 
 T.onChange = push;
 T.onView = v => { if (v === 'mi-id') { $('renForm').hidden = true; $('renOffForm').hidden = true; $('idForm').hidden = false; err('idErr'); err('renErr'); paint() } };
