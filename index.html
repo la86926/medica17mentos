@@ -11,11 +11,11 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Tratamiento">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="icon" href="favicon.ico?v=1.5" sizes="any">
-<link rel="icon" href="favicon-32.png?v=1.5" type="image/png" sizes="32x32">
-<link rel="icon" href="favicon-16.png?v=1.5" type="image/png" sizes="16x16">
-<link rel="apple-touch-icon" href="logo-180.png?v=1.5" sizes="180x180">
-<link rel="manifest" href="manifest.webmanifest?v=1.5">
+<link rel="icon" href="favicon.ico?v=1.6" sizes="any">
+<link rel="icon" href="favicon-32.png?v=1.6" type="image/png" sizes="32x32">
+<link rel="icon" href="favicon-16.png?v=1.6" type="image/png" sizes="16x16">
+<link rel="apple-touch-icon" href="logo-180.png?v=1.6" sizes="180x180">
+<link rel="manifest" href="manifest.webmanifest?v=1.6">
 <meta property="og:title" content="Mi tratamiento">
 <meta property="og:description" content="Organiza tus medicamentos y tus tomas, y sincronízalos con tu ID.">
 <meta property="og:image" content="https://la86926.github.io/medica17mentos/logo-512.png">
@@ -148,10 +148,8 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
 .mnav button[aria-current="page"]{background:var(--faint)}
 .mnav button[aria-current="page"] svg{color:var(--fg)}
 .mnav button:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
-.mnav button svg.pillic{stroke:none}
-.mnav button svg.pillic path{fill:currentColor}
 .mnav .dot{width:7px;height:7px;border-radius:50%;background:var(--m0);margin-left:auto}
-.mver{margin:auto 10px 0;font-size:12px;color:var(--muted);opacity:.75}
+.mv{font-size:12px;font-weight:600;color:var(--muted);opacity:.8;align-self:flex-end;margin-bottom:2px;font-variant-numeric:tabular-nums}
 @media (min-width:960px){
   .menu{transform:none;transition:none}
   .menu.open{box-shadow:none}
@@ -248,6 +246,9 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
       <div class="idrow"><div class="code" id="idCode"></div><button class="lnk" id="idCopy" type="button">Copiar</button></div>
       <p class="st" id="idState"></p>
       <p class="note">Quien tenga tu ID puede ver tus tomas. No lo compartas.</p>
+      <button class="lnk" id="idRen" type="button">Cambiar ID</button>
+      <form class="idform" id="renForm" autocomplete="off" hidden><input id="renIn" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="28" placeholder="Nuevo ID" aria-label="Nuevo ID"><button class="btn" type="submit" id="renGo">Guardar</button></form>
+      <p class="ferr" id="renErr" role="alert"></p>
       <button class="lnk out" id="idOut" type="button">Cerrar sesión en este dispositivo</button>
     </div>
   </div>
@@ -255,13 +256,12 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
 
 <div class="scrim" id="scrim" hidden></div>
 <aside class="menu" id="menu" aria-label="Menú">
-  <div class="mhead"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><b>Mi tratamiento</b></div>
+  <div class="mhead"><span class="logo" aria-hidden="true"><svg viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg></span><b>Mi tratamiento</b><span class="mv">v1.6</span></div>
   <nav class="mnav">
-    <button data-view="medicamentos"><svg class="pillic" viewBox="0 0 512 512"><path fill-rule="evenodd" d="M456 34 L434 19 L415 10 L392 3 L387 3 L380 1 L371 1 L370 0 L350 0 L349 1 L340 1 L339 2 L329 3 L305 10 L288 18 L263 35 L35 263 L18 288 L10 305 L6 317 L1 340 L0 370 L1 371 L1 380 L2 381 L3 392 L12 420 L25 444 L34 456 L47 470 L67 486 L91 499 L111 506 L131 510 L161 511 L162 510 L177 509 L206 501 L223 493 L248 476 L476 248 L493 223 L501 206 L505 194 L510 171 L511 141 L510 140 L510 131 L509 130 L508 119 L504 104 L492 77 L477 55Z M165 218 L167 223 L165 231 L86 311 L79 322 L73 336 L70 351 L69 365 L65 370 L61 372 L52 371 L46 364 L47 341 L54 318 L65 299 L75 287 L146 216 L151 213 L159 213Z M373 46 L392 50 L412 59 L429 71 L444 87 L452 99 L461 119 L465 138 L465 164 L462 179 L457 193 L443 216 L338 322 L189 173 L287 75 L299 65 L318 54 L332 49 L347 46Z"/></svg>Medicamentos</button>
+    <button data-view="medicamentos"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4.6" y="1.8" width="6.8" height="2.6" rx=".9"/><path d="M5.6 4.4v1.3L3.9 8.1a2 2 0 0 0-.4 1.2v6.9c0 .9.7 1.6 1.6 1.6h3.4"/><path d="M10.4 4.4v1.3l1.7 2.4c.3.4.4.8.4 1.2v1.4"/><path d="M8 10.3v3.2M6.4 11.9h3.2"/><rect x="9.4" y="13.2" width="9.2" height="4.4" rx="2.2" transform="rotate(-30 14 15.4)"/><path d="M13.1 13.6l1.9 3.4"/></svg>Medicamentos</button>
     <button data-view="horario"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2.5"/><path d="M3 8h14M7 2.5v3M13 2.5v3"/></svg>Horario</button>
     <button data-view="mi-id"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="7" r="3.3"/><path d="M3.8 17c.8-3.2 3.3-5 6.2-5s5.4 1.8 6.2 5"/></svg>Mi ID<i class="dot" id="idDot" hidden></i></button>
   </nav>
-  <p class="mver">Mi tratamiento · v1.5</p>
 </aside>
 
 <div class="sheet-bg" id="medBg" hidden>
