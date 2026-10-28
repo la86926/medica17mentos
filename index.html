@@ -71,10 +71,11 @@ header p{margin:6px 0 0;color:var(--muted);font-size:14px;font-weight:500}
 .tc .cal{padding:4px 0}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);font-size:13px;font-weight:600;padding:9px 14px;border-radius:999px;z-index:50;max-width:calc(100% - 40px);text-align:center}
 .times{display:flex;flex-direction:column;gap:32px}
-.time{display:grid;grid-template-columns:64px 1fr;gap:12px;align-items:start}
+.time{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
 .time .t{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;padding-top:12px;color:var(--muted);position:relative}
 .time .t .sub{display:block;font-size:11px;font-weight:600;margin-top:2px}
 .time .t.ed{color:var(--fg);cursor:pointer}
+.time .t.ed .ap{font-size:12px;font-weight:700;margin-left:3px}
 .time .t.ed .v{border-bottom:1.5px dashed var(--muted);padding-bottom:1px}
 .time .t.ed svg{width:12px;height:12px;margin-left:4px;vertical-align:-1px;stroke:var(--muted)}
 button.t{border:0;background:none;font-family:var(--font);text-align:left;margin:0}
@@ -88,7 +89,7 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
 .sh-ok svg{width:20px;height:20px}
 .wheels{position:relative;display:flex;justify-content:center;align-items:center;gap:6px;height:220px}
 .band{position:absolute;left:0;right:0;top:88px;height:44px;border-radius:12px;background:var(--faint)}
-.wheel{position:relative;height:220px;width:80px;box-sizing:border-box;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;padding-block:88px;
+.wheel{position:relative;height:220px;width:72px;box-sizing:border-box;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;padding-block:88px;
   overscroll-behavior:contain;-webkit-overflow-scrolling:touch;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
 .wheel::-webkit-scrollbar{display:none}
 .wheel div{height:44px;display:grid;place-items:center;font:700 26px var(--font);font-variant-numeric:tabular-nums;scroll-snap-align:center;color:var(--muted)}
@@ -134,10 +135,10 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
   <section class="ends" id="ends"></section>
 </div>
 <div class="sheet-bg" id="sheetBg" hidden>
-  <div class="sheet" role="dialog" aria-modal="true" aria-label="Hora de la primera toma">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Cambiar hora">
     <div class="sh-top"><button class="sh-x" id="shCancel">Cancelar</button>
       <button class="sh-ok" id="shOk" aria-label="Listo"><svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.3l2.6 2.6L11 4.4"/></svg></button></div>
-    <div class="wheels"><div class="band"></div><div class="wheel" id="wH"></div><span class="colon">:</span><div class="wheel" id="wM"></div></div>
+    <div class="wheels"><div class="band"></div><div class="wheel" id="wH"></div><span class="colon">:</span><div class="wheel" id="wM"></div><div class="wheel" id="wA"></div></div>
     <p class="sh-prev" id="shPrev"></p>
   </div>
 </div>
@@ -154,16 +155,14 @@ const addD=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const CHECK='<svg viewBox="0 0 14 14" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7.3l2.6 2.6L11 4.4"/></svg>';
 const $=id=>document.getElementById(id);
 
-// Deflazym: 15 tablets, ideally every 8 h, never after 23:00.
-// If the day starts late, the three doses are spaced evenly up to 23:00 (at least 5 h apart);
-// whatever does not fit moves to the next day.
-const LATEST=1380,MINGAP=300,DEF_TOTAL=15;
-function defTimes(S){const w=LATEST-S;if(w<0)return[];
-  if(w>=2*MINGAP){const g=Math.min(480,Math.floor(w/10)*5);return[S,S+g,S+2*g]}
-  if(w>=MINGAP){const g=Math.min(480,Math.floor(w/5)*5);return[S,S+g]}
-  return[S]}
-function plan(){const p=[];let rem=DEF_TOTAL;
-  for(let i=0;i<NDAYS;i++){const S=startFor(i),d=rem>0?defTimes(S).slice(0,rem):[];rem-=d.length;p.push({S,def:d})}
+// Deflazym: every 8 h, 3 a day for 5 days. Each day starts at 8:00 AM unless that day was changed.
+// Changing a dose moves the doses after it (8 h later each), even past midnight.
+const GAP=480,DEFAULT_START=480;
+function defTimes(i){const key=iso(addD(START,i)),out=[startFor(i)];
+  for(let j=1;j<3;j++){const o=state.t[key+"|"+j];out.push(o!=null?+o:out[j-1]+GAP)}
+  return out}
+function plan(){const p=[];
+  for(let i=0;i<NDAYS;i++){const d=i<=MEDS.d.end?defTimes(i):[];p.push({S:startFor(i),def:d})}
   return p}
 const SLOTKEYS=["0700","1500","2300"];
 function dosesFor(i,P){
@@ -177,11 +176,14 @@ function dosesFor(i,P){
 // state: plain, mutable copies only
 let state={c:{},tf:{},t:{}};
 const load=s=>({c:Object.assign({},s&&s.c),tf:Object.assign({},s&&s.tf),t:Object.assign({},s&&s.t)});
-// start time of a day: only its own change counts; every other day starts at 9:00
+// start time of a day: only its own change counts; every other day starts at 8:00 AM
 const toMin=s=>{const [h,m]=s.split(":").map(Number);return h*60+m};
 const toHH=m=>String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");
-function startFor(i){const v=state.t[iso(addD(START,i))];return v?Math.min(LATEST,toMin(v)):540}
-const fmtMin=m=>Math.floor(m/60)+":"+String(m%60).padStart(2,"0");
+function startFor(i){const v=state.t[iso(addD(START,i))];return v?toMin(v):DEFAULT_START}
+const fmtMin=m=>{const r=((m%1440)+1440)%1440;return Math.floor(r/60)+":"+String(r%60).padStart(2,"0")};
+function p12(m){const r=((m%1440)+1440)%1440,h=Math.floor(r/60);return{t:(h%12||12)+":"+String(r%60).padStart(2,"0"),ap:h<12?"AM":"PM"}}
+const fmt12=m=>{const p=p12(m);return p.t+" "+p.ap};
+const nextDayLbl=m=>m>=1440?(((m-1440)/60)<6?"madrugada":"día siguiente"):"";
 const PEN='<svg viewBox="0 0 12 12" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8.2 1.8l2 2L4 10H2V8z"/></svg>';
 try{const s=JSON.parse(localStorage.getItem("trat-v1")||"null");if(s)state=load(s)}catch(e){}
 const saveLocal=()=>{try{localStorage.setItem("trat-v1",JSON.stringify(state))}catch(e){}};
@@ -212,9 +214,9 @@ function renderDay(P){
   $("dtitle").textContent=(sel===todayI?"Hoy · ":"")+DIASL[d.getDay()]+" "+d.getDate()+" de "+MESESL[d.getMonth()];
   $("calDay").innerHTML=calIcon(d.getDate())+'<span class="lbl">Agregar día</span>';
   $("times").innerHTML=dosesFor(sel,P).map((x,j)=>{const first=j===0;
-    const lab=first?`<button class="t ed" id="startBtn" aria-label="Cambiar hora de la primera toma"><span class="v">${fmtMin(x.time)}</span>${PEN}</button>`
-      :`<div class="t">${fmtMin(x.time)}</div>`;
-    return `<div class="time"><div class="tc">${lab}<button class="cal" data-slot="${j}" aria-label="Agregar la toma de las ${fmtMin(x.time)} a mi calendario">${calIcon(d.getDate())}</button></div><div class="items">`+
+    const p=p12(x.time),nd=nextDayLbl(x.time);
+    const lab=`<button class="t ed" data-edit="${j}" aria-label="Cambiar la hora de las ${fmt12(x.time)}"><span class="v">${p.t}</span><span class="ap">${p.ap}</span>${PEN}${nd?`<span class="sub">${nd}</span>`:""}</button>`;
+    return `<div class="time"><div class="tc">${lab}<button class="cal" data-slot="${j}" aria-label="Agregar la toma de las ${fmt12(x.time)} a mi calendario">${calIcon(d.getDate())}</button></div><div class="items">`+
     x.meds.map(m=>{const k=key+"|"+x.h+"|"+m,on=!!state.c[k];
       return `<button class="it${on?" on":""}" data-k="${k}" aria-pressed="${on}" style="--c:var(${MEDS[m].c})"><span class="b">${CHECK}</span><span class="l">${MEDS[m].n}</span></button>`}).join("")+
     `${first?(x.meds.length>1?'<p class="hint">Juntas, con comida</p>':'<p class="hint">Con comida</p>'):''}${first&&warn?`<p class="warn">${warn}</p>`:''}</div></div>`}).join("");
@@ -228,32 +230,41 @@ function renderEnds(P){
 }
 function render(){const P=plan();renderStrip(P);renderDay(P);renderEnds(P)}
 
-// time picker: closes only with Listo or Cancelar
-const HOURS=[];for(let h=5;h<=23;h++)HOURS.push(h);
+// time picker (12 h, AM/PM): closes only with Listo or Cancelar
+const HOURS=[];for(let h=1;h<=12;h++)HOURS.push(h);
 const MINS=[];for(let m=0;m<60;m+=5)MINS.push(m);
-const IH=44;
-function fillWheel(el,arr){el.innerHTML=arr.map(v=>`<div>${String(v).padStart(2,"0")}</div>`).join("")}
-fillWheel($("wH"),HOURS);fillWheel($("wM"),MINS);
+const APS=["AM","PM"];
+const IH=44;let editSlot=0;
+function fillWheel(el,arr,pad){el.innerHTML=arr.map(v=>`<div>${pad?String(v).padStart(2,"0"):v}</div>`).join("")}
+fillWheel($("wH"),HOURS,false);fillWheel($("wM"),MINS,true);fillWheel($("wA"),APS,false);
 const idxOf=el=>Math.max(0,Math.min(el.children.length-1,Math.round(el.scrollTop/IH)));
-function pickVal(){let h=HOURS[idxOf($("wH"))],m=MINS[idxOf($("wM"))];if(h===23)m=0;return h*60+m}
+function pickVal(){const h=HOURS[idxOf($("wH"))]%12+(idxOf($("wA"))?12:0);return h*60+MINS[idxOf($("wM"))]}
+// apply a picked time to the selected day: later doses follow 8 h apart
+function applyPick(t,v){const key=iso(addD(START,sel));
+  if(editSlot===0){t[key]=toHH(v);delete t[key+"|1"];delete t[key+"|2"];return}
+  const saved=state.t;state.t=t;const prev=defTimes(sel)[editSlot-1];state.t=saved;
+  while(v<=prev)v+=1440;
+  t[key+"|"+editSlot]=v;if(editSlot===1)delete t[key+"|2"];}
 let rafP=0;
 function onWheel(){cancelAnimationFrame(rafP);rafP=requestAnimationFrame(()=>{
-  for(const el of [$("wH"),$("wM")]){const i=idxOf(el);[...el.children].forEach((c,j)=>c.classList.toggle("cur",j===i))}
-  const key=iso(addD(START,sel)),old=state.t[key];state.t[key]=toHH(pickVal());
-  const P=plan(),p=P[sel];if(old===undefined)delete state.t[key];else state.t[key]=old;
-  $("shPrev").textContent=p.def.length?"Deflazym: "+p.def.map(fmtMin).join(" · "):"";
+  for(const el of [$("wH"),$("wM"),$("wA")]){const i=idxOf(el);[...el.children].forEach((c,j)=>c.classList.toggle("cur",j===i))}
+  const saved=state.t,tmp=Object.assign({},saved);applyPick(tmp,pickVal());state.t=tmp;
+  const P=plan(),p=P[sel];state.t=saved;
+  $("shPrev").textContent=p.def.length?"Deflazym: "+p.def.map(fmt12).join(" · "):"";
 })}
-$("wH").addEventListener("scroll",onWheel,{passive:true});$("wM").addEventListener("scroll",onWheel,{passive:true});
-function openPicker(){
-  const S=startFor(sel);$("sheetBg").hidden=false;document.body.style.overflow="hidden";
+for(const id of ["wH","wM","wA"])$(id).addEventListener("scroll",onWheel,{passive:true});
+function openPicker(j){
+  editSlot=j;const P=plan(),x=dosesFor(sel,P)[j];if(!x)return;
+  const r=((x.time%1440)+1440)%1440,h=Math.floor(r/60);
+  $("sheetBg").hidden=false;document.body.style.overflow="hidden";
   requestAnimationFrame(()=>{
-    $("wH").scrollTop=Math.max(0,HOURS.indexOf(Math.floor(S/60)))*IH;
-    $("wM").scrollTop=Math.max(0,MINS.indexOf(Math.round((S%60)/5)*5))*IH;onWheel()});
+    $("wH").scrollTop=Math.max(0,HOURS.indexOf(h%12||12))*IH;
+    $("wM").scrollTop=Math.max(0,MINS.indexOf(Math.floor((r%60)/5)*5))*IH;
+    $("wA").scrollTop=(h<12?0:1)*IH;onWheel()});
 }
 function closePicker(){$("sheetBg").hidden=true;document.body.style.overflow=""}
 $("shCancel").addEventListener("click",closePicker);
-$("shOk").addEventListener("click",()=>{state.t[iso(addD(START,sel))]=toHH(pickVal());closePicker();persist();render()});
-
+$("shOk").addEventListener("click",()=>{applyPick(state.t,pickVal());closePicker();persist();render()});
 
 // sync across your devices (falls back to this device)
 let ref=null,writing=false,pending=false,lastLocal=0;
@@ -274,7 +285,7 @@ function persist(){saveLocal();lastLocal=Date.now();if(!ref)return;if(writing){p
 
 document.addEventListener("click",e=>{
   const dy=e.target.closest(".day");if(dy){sel=+dy.dataset.i;render();return}
-  if(e.target.closest("#startBtn")){openPicker();return}
+  const ed=e.target.closest("[data-edit]");if(ed){openPicker(+ed.dataset.edit);return}
   if(e.target.closest("#calDay")){addToCalendar(null);return}
   const cb=e.target.closest(".cal[data-slot]");if(cb){addToCalendar(+cb.dataset.slot);return}
   const it=e.target.closest(".it");if(it){const k=it.dataset.k;
