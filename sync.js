@@ -1,10 +1,17 @@
 /* Mi tratamiento · Mi ID: cuenta con un código (sin contraseña) para sincronizar entre dispositivos.
    Usa Firebase (inicio de sesión anónimo + Firestore). Cada ID se guarda en el documento
    "trat<id>" de la colección "progresos", con la forma {l1, l2, timestamp, updatedBy, schemaVersion};
-   los datos del tratamiento van dentro de l1. Así el mismo ID del ajedrez sirve aquí sin mezclar datos. */
+   los datos del tratamiento van dentro de l1. Proyecto propio de Firebase: medica17mento. */
 const FB = 'https://www.gstatic.com/firebasejs/12.18.0/';
 // Configuración web del proyecto de Firebase (Configuración del proyecto → Tus apps → firebaseConfig).
-const firebaseConfig = null;
+const firebaseConfig = {
+  apiKey: 'AIzaSyAf8m6qrqiEuif-tcefACvOphtsVuNwAL0',
+  authDomain: 'medica17mento.firebaseapp.com',
+  projectId: 'medica17mento',
+  storageBucket: 'medica17mento.firebasestorage.app',
+  messagingSenderId: '98257290127',
+  appId: '1:98257290127:web:31aabd4d5e39672f8dc1fa'
+};
 
 const COLL = 'progresos', PREFIX = 'trat', ID_RE = /^[a-z0-9]{4,28}$/;
 const st = {
