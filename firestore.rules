@@ -1,0 +1,33 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Cada ID se guarda como "trat" + el ID (de 4 a 28 letras minúsculas o números)
+    function idValido(docId) {
+      return docId.matches('^trat[a-z0-9]{4,28}$');
+    }
+
+    function datosValidos(d) {
+      return d.keys().hasAll(['l1', 'l2', 'timestamp', 'updatedBy', 'schemaVersion'])
+        && d.keys().hasOnly(['l1', 'l2', 'timestamp', 'updatedBy', 'schemaVersion'])
+        && d.l1 is map
+        && d.l2 is map
+        && d.timestamp is timestamp
+        && d.updatedBy is string
+        && d.updatedBy.size() <= 64
+        && d.schemaVersion is int;
+    }
+
+    match /progresos/{docId} {
+      allow get: if signedIn() && idValido(docId);
+      allow list: if false;   // nadie puede ver la lista de IDs de otras personas
+      allow create, update: if signedIn() && idValido(docId) && datosValidos(request.resource.data);
+      allow delete: if signedIn() && idValido(docId);   // necesario para «Cambiar ID»
+    }
+  }
+}
