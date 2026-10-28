@@ -1,4 +1,4 @@
-const CACHE="tratamiento-v1.9";
+const CACHE="tratamiento-v2.0";
 const FILES=["./","index.html","sync.js","logo.svg","favicon.ico","favicon-16.png","favicon-32.png","logo-180.png","logo-192.png","logo-512.png","logo-maskable-512.png","manifest.webmanifest"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES)));self.skipWaiting()});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))));self.clients.claim()});

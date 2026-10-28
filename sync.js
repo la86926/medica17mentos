@@ -65,7 +65,7 @@ const pack = s => ({
   l2: {}, timestamp: ts(), updatedBy: clientId, schemaVersion: 1
 });
 const fromCloud = r => ({ meds: r.meds || [], c: r.c || {}, t: r.t || {}, tf: (T.get().tf) || {} });
-const hasData = d => !!((d.meds && d.meds.length) || (d.c && Object.keys(d.c).length));
+const hasData = d => !!(d.meds && d.meds.some(m => !m.ex));
 const same = (a, b) => JSON.stringify([a.meds || [], a.c || {}, a.t || {}]) === JSON.stringify([b.meds || [], b.c || {}, b.t || {}]);
 
 // read an ID, following the note an old ID leaves after «Cambiar ID»
@@ -104,8 +104,8 @@ async function entrar(raw) {
     if (!r.data) return err('idErr', `No existe el ID «${id}». Revisa que esté bien escrito, o tócalo en Crear.`);
     const local = T.get();
     if (hasData(local) && hasData(r.data) && !same(local, r.data)) { pending = r; openChoice(); return }
-    if (hasData(r.data) || !hasData(local)) T.set(fromCloud(r.data));
-    else await fb.fs.setDoc(docFor(r.id), pack(local));
+    if (hasData(r.data)) T.set(fromCloud(r.data));
+    else await fb.fs.setDoc(docFor(r.id), pack(local)); // the ID has no medicines of its own yet: keep this device's
     use(r.id); $('idIn').value = '';
   } catch (e) { err('idErr', 'No se pudo entrar. Revisa tu conexión e inténtalo de nuevo.') }
   finally { busy(false) }
