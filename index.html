@@ -25,15 +25,15 @@ img{max-width:100%}
 :root{
   --bg:#fbfcfd; --fg:#16202a; --muted:#8a97a4; --faint:#e7ecf0;
   --sel:#16202a; --selfg:#ffffff;
-  --a:#2f8f6b; --d:#d08a1c; --k:#7656b8; --blue:#2f6fdb;
+  --a:#2f8f6b; --d:#d08a1c; --k:#7656b8; --blue:#2f6fdb; --red:#e5483f; --card:#ffffff;
   --font:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1418; --fg:#e8eef3; --muted:#7f8e9b; --faint:#232d36; --sel:#e8eef3; --selfg:#0f1418;
-  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; color-scheme:dark}}
+  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; --red:#ff5a50; --card:#1d262e; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1418; --fg:#e8eef3; --muted:#7f8e9b; --faint:#232d36; --sel:#e8eef3; --selfg:#0f1418;
-  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; color-scheme:dark}
+  --a:#5fd0a3; --d:#f0b24f; --k:#b49af0; --blue:#3d7ef0; --red:#ff5a50; --card:#1d262e; color-scheme:dark}
 html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:16px;line-height:1.4;
   padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px));
@@ -58,7 +58,13 @@ header p{margin:6px 0 0;color:var(--muted);font-size:14px;font-weight:500}
 .drow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 -16px}
 .dtitle{font-size:14px;color:var(--muted);font-weight:600;margin:0}
 .cal{display:inline-flex;align-items:center;gap:6px;border:0;background:none;color:var(--muted);font:600 13px var(--font);padding:6px 0;cursor:pointer}
-.cal svg{width:16px;height:16px;stroke:currentColor;flex:none}
+.ciw{position:relative;display:inline-block;flex:none}
+.ci{width:24px;height:26px;border-radius:6px;background:var(--card);box-shadow:0 0 0 1px var(--faint),0 1px 3px rgba(0,0,0,.12);overflow:hidden;display:flex;flex-direction:column}
+.ci-top{height:7px;background:var(--red);flex:none}
+.ci-n{flex:1;display:grid;place-items:center;font:800 12px/1 var(--font);color:var(--fg);font-variant-numeric:tabular-nums}
+.ci-plus{position:absolute;right:-6px;bottom:-6px;width:15px;height:15px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 2px var(--bg);display:grid;place-items:center}
+.ci-plus svg{width:9px;height:9px}
+.cal span.lbl{color:var(--fg)}
 .cal:hover,.cal:focus-visible{color:var(--fg)}
 .cal:focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:6px}
 .tc{display:flex;flex-direction:column;align-items:flex-start;gap:2px}
@@ -122,7 +128,7 @@ button.t{border:0;background:none;font-family:var(--font);text-align:left;margin
   </header>
   <nav class="strip" id="strip" role="tablist" aria-label="Días del tratamiento"></nav>
   <section>
-    <div class="drow"><p class="dtitle" id="dtitle"></p><button class="cal" id="calDay" aria-label="Agregar todas las tomas del día a mi calendario"><svg viewBox="0 0 16 16" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3M8 8.5v3.5M6.25 10.25h3.5"/></svg><span>Agregar día</span></button></div>
+    <div class="drow"><p class="dtitle" id="dtitle"></p><button class="cal" id="calDay" aria-label="Agregar todas las tomas del día a mi calendario"></button></div>
   </section>
   <section class="times" id="times"></section>
   <section class="ends" id="ends"></section>
@@ -204,10 +210,11 @@ function warnFor(i,P){
 function renderDay(P){
   const d=addD(START,sel),key=iso(d),warn=warnFor(sel,P);
   $("dtitle").textContent=(sel===todayI?"Hoy · ":"")+DIASL[d.getDay()]+" "+d.getDate()+" de "+MESESL[d.getMonth()];
+  $("calDay").innerHTML=calIcon(d.getDate())+'<span class="lbl">Agregar día</span>';
   $("times").innerHTML=dosesFor(sel,P).map((x,j)=>{const first=j===0;
     const lab=first?`<button class="t ed" id="startBtn" aria-label="Cambiar hora de la primera toma"><span class="v">${fmtMin(x.time)}</span>${PEN}</button>`
       :`<div class="t">${fmtMin(x.time)}</div>`;
-    return `<div class="time"><div class="tc">${lab}<button class="cal" data-slot="${j}" aria-label="Agregar la toma de las ${fmtMin(x.time)} a mi calendario">${CALSVG}</button></div><div class="items">`+
+    return `<div class="time"><div class="tc">${lab}<button class="cal" data-slot="${j}" aria-label="Agregar la toma de las ${fmtMin(x.time)} a mi calendario">${calIcon(d.getDate())}</button></div><div class="items">`+
     x.meds.map(m=>{const k=key+"|"+x.h+"|"+m,on=!!state.c[k];
       return `<button class="it${on?" on":""}" data-k="${k}" aria-pressed="${on}" style="--c:var(${MEDS[m].c})"><span class="b">${CHECK}</span><span class="l">${MEDS[m].n}</span></button>`}).join("")+
     `${first?(x.meds.length>1?'<p class="hint">Juntas, con comida</p>':'<p class="hint">Con comida</p>'):''}${first&&warn?`<p class="warn">${warn}</p>`:''}</div></div>`}).join("");
@@ -275,8 +282,9 @@ document.addEventListener("click",e=>{
     hideHand();persist();render()}
 });
 
+const PLUS='<svg viewBox="0 0 10 10" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M5 2v6M2 5h6"/></svg>';
+const calIcon=n=>`<span class="ciw" aria-hidden="true"><span class="ci"><span class="ci-top"></span><span class="ci-n">${n}</span></span><span class="ci-plus">${PLUS}</span></span>`;
 // add doses to the phone's calendar (.ics works on iPhone, iPad, Mac and Android)
-const CALSVG='<svg viewBox="0 0 16 16" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3M8 8.5v3.5M6.25 10.25h3.5"/></svg>';
 function icsTime(d,min){const x=new Date(d);x.setHours(0,min,0,0);
   const p=n=>String(n).padStart(2,"0");return x.getFullYear()+p(x.getMonth()+1)+p(x.getDate())+"T"+p(x.getHours())+p(x.getMinutes())+"00"}
 function addToCalendar(slot){
@@ -284,13 +292,13 @@ function addToCalendar(slot){
   if(!list.length)return;
   const stamp=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+Z$/,"Z");
   const ev=list.map(({x,j})=>{const names=x.meds.map(m=>MEDS[m].n);
-    return ["BEGIN:VEVENT","UID:"+iso(d)+"-"+j+"-tratamiento@la86926","DTSTAMP:"+stamp,
+    return ["BEGIN:VEVENT","UID:"+iso(d)+"-"+j+"-"+icsTime(d,x.time)+"-"+Date.now()+"@la86926","DTSTAMP:"+stamp,
       "DTSTART:"+icsTime(d,x.time),"DTEND:"+icsTime(d,x.time+10),
       "SUMMARY:Tomar "+names.join(" + "),"DESCRIPTION:"+names.join("\\n"),
       "BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:Tomar "+names.join(" + "),"TRIGGER:-PT0M","END:VALARM","END:VEVENT"].join("\r\n")});
   const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Mi tratamiento//ES","CALSCALE:GREGORIAN","METHOD:PUBLISH",...ev,"END:VCALENDAR"].join("\r\n");
   const blob=new Blob([ics],{type:"text/calendar;charset=utf-8"}),url=URL.createObjectURL(blob);
-  const a=document.createElement("a");a.href=url;a.download="tomas-"+iso(d)+(slot===null?"":"-"+fmtMin(list[0].x.time).replace(":",""))+".ics";
+  const a=document.createElement("a");a.href=url;a.download="tomas-"+iso(d)+"-"+list.map(o=>fmtMin(o.x.time).replace(":","h")).join("-")+".ics";
   document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
   toast(slot===null?"Abre el archivo para agregar el día a tu calendario":"Abre el archivo para agregar la toma a tu calendario");
 }
